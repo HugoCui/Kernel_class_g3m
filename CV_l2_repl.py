@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Logistic regression on the G$^3$M model
 
 # In[55]:
 
