@@ -1,3 +1,5 @@
+#simulations curves for artificial Gaussian dataset, \ell_2 classification.
+
 
 import numpy as np
 import pandas as pd
@@ -8,12 +10,7 @@ parser=argparse.ArgumentParser(description="Job launcher")
 from scipy.special import erf
 from sklearn.metrics import make_scorer
 
-#from sklearn.gaussian_process.kernels import RBF
-#from sklearn.model_selection import train_test_split
-
-#from sklearn.kernel_ridge import KernelRidge
 import sys
-#parser.add_argument("-l",type=float)#lambda
 parser.add_argument("-a",type=float)#alpha
 parser.add_argument("-r",type=float)#r
 parser.add_argument("-p",type=int)#p
@@ -30,19 +27,15 @@ from sklearn.model_selection import GridSearchCV
 from sklearn import linear_model
 from sklearn.linear_model import SGDClassifier, LogisticRegression
 
-# %load_ext autoreload
-# %autoreload 2
-# Dimensions
+
 p = args.p
 alph=args.a
 r=args.r 
 k = p
 d=p
- #Noise variance
+
 gamma = k/p
 sig=args.s
-# Regularisation
-#ell=args.l
 
 
 
@@ -65,7 +58,7 @@ Phi=np.diag(Phi)
 
 
 
-def get_instance(*, samples,seed):
+def get_instance(*, samples,seed):  #creates a dataset
     np.random.seed(seed)
     X = np.sqrt(spec_Omega) * np.random.normal(0,1,(samples, p))
     np.random.seed(seed+76545)
