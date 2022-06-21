@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
-
+# g3m (theory) curves for max-margin classification.
 
 import numpy as np
 import pandas as pd
@@ -10,10 +8,6 @@ import argparse
 parser=argparse.ArgumentParser(description="Job launcher")
 from scipy.special import erf
 from scipy.integrate import quad,nquad
-#from sklearn.gaussian_process.kernels import RBF
-#from sklearn.model_selection import train_test_split
-
-#from sklearn.kernel_ridge import KernelRidge
 import sys
 
 epsabs = 1e-10
@@ -26,25 +20,16 @@ parser.add_argument("-p",type=int)#p
 args=parser.parse_args()
 
 
-sys.path.insert(1, 'g3m_utils/')
+sys.path.insert(1, 'g3m_utils/')  #g3m package, see Loureiro et al., NIPS 2021
 from state_evolution.data_models.custom import CustomSpectra
 from state_evolution.experiments.learning_curve import CustomExperiment
 from sklearn.model_selection import GridSearchCV
 from sklearn import linear_model
 from sklearn.linear_model import SGDClassifier, LogisticRegression
 
-# %load_ext autoreload
-# %autoreload 2
 
-
-# ## Global Variables
-
-# In[56]:
-
-
-# Dimensions
 p = args.p
-alph=args.a
+alph=args.a 
 r=args.r 
 
 k = p
@@ -56,9 +41,6 @@ gamma = k/p
 lamb = args.l
 print("lambda=",lamb)
 
-# ## Replicas
-
-# In[3]:
 
 alphas=np.logspace(1,np.log10(p),10)/p
 l=len(alphas)
@@ -71,11 +53,6 @@ Phi = spec_Omega0
 Psi = spec_Omega0
 
 teacher = np.sqrt(np.array([1/(k+1)**((1+alph*(2*r-1))) for k in range(p)]))
-
-
-# In[5]:
-
-
 rho = np.mean(Psi * teacher**2)
 diagUtPhiPhitU0 = Phi**2 * teacher**2
 
@@ -230,15 +207,7 @@ def iterate_sp(alpha, gamma, lamb, rho, max_iter=int(1000), init=(1, 0.02, 0.01)
     return q0[:t + 1], m[:t + 1], v[:t+1], qhat[:t + 1], mhat[:t + 1], vhat[:t+1],t
 
 
-# In[165]:
 
-
-#alphas = np.linspace(0.01, .5, 20)
-
-#data = {'lambda': [], 'rho': [], 'sample_complexity': [], 
-        #'generr':[], 'q': [], 'm': [], 'V': [], 't': [],"qhat":[],"mhat":[],"Vhat":[]}
-
-#init=(1, 0.2, 0.01)
 def get_all(alpha, iter):
     init=(1,0.2,0.01)
     # Initialise qu and qv
@@ -262,19 +231,13 @@ def get_all(alpha, iter):
 pool=mp.Pool(mp.cpu_count())
 results=pool.starmap_async(get_all,[(alphas[i],i) for i in range(l)]).get()
 pool.close()
-#results=np.array(results).astype(np.float)
+
 
 keys=['task', 'gamma',
        'lambda', 'rho', 'sample_complexity', 'V', 'm', 'q', 'Vhat', 'mhat',
        'qhat', 'test_error']
 
 replicas=pd.DataFrame(data=results, columns=keys)
-
-
-#print(replicas)
-#print(results)
-
-
 
 
 replicas["eta"]=replicas["m"].values/np.sqrt(rho*replicas["q"].values)
