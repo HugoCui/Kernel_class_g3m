@@ -1,5 +1,6 @@
 
 #Simulations for real datasets, \ell_2 classification.
+# The datasets are standard and can be readily found online. They are not included in the repo because of space limitations. 
 
 import numpy as np
 import pandas as pd
