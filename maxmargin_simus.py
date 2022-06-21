@@ -1,4 +1,4 @@
-
+# Simulations for artificial Gaussian datasets, max-margin classification
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -7,14 +7,11 @@ import argparse
 parser=argparse.ArgumentParser(description="Job launcher")
 from scipy.special import erf
 
-#from sklearn.gaussian_process.kernels import RBF
-#from sklearn.model_selection import train_test_split
 
-#from sklearn.kernel_ridge import KernelRidge
 import sys
-parser.add_argument("-l",type=float)#lambda
-parser.add_argument("-a",type=float)#alpha
-parser.add_argument("-r",type=float)#r
+parser.add_argument("-l",type=float)#lambda, regularization
+parser.add_argument("-a",type=float)#alpha, capacity
+parser.add_argument("-r",type=float)#r, source
 parser.add_argument("-p",type=int)#p
 parser.add_argument("-v",type=int)#sample complexity
 args=parser.parse_args()
@@ -28,19 +25,16 @@ from sklearn.model_selection import GridSearchCV
 from sklearn import linear_model
 from sklearn.linear_model import SGDClassifier, LogisticRegression
 
-# %load_ext autoreload
-# %autoreload 2
-# Dimensions
+
 p = args.p
 alph=args.a
 r=args.r 
 k = p
 d=p
- #Noise variance
+
 gamma = k/p
 
-# Regularisation
-lamb = 1e-4
+lamb = 1e-4  #Vanishing regularization for max-margin.
 
 
 
@@ -72,18 +66,11 @@ def get_instance(*, samples,seed):
     
 
 
-
-# Implements pseudo-inverse solution for ridge regression
 def logistic_estimator(*, X, y, lamb):
     w = LogisticRegression(penalty='l2',C=1./lamb, fit_intercept=False,solver='lbfgs',random_state=0,max_iter=10000, tol=0.00001).fit(X,y).coef_[0]
-    #w = SGDClassifier(loss='hinge', penalty='l2', fit_intercept=False, alpha = lamb, max_iter=1e4, tol=1e-7, verbose=0).fit(X, y).coef_[0]
     return w
 
 
-# In[32]:
-
-
-# Simulate the problem for a given sample complexity and average over given number of seeds.
 def simulate(samples, lamb, seed, estimator="logistic"):
     verbose=False
     n = samples
