@@ -2,7 +2,7 @@
 # coding: utf-8
 
 
-# In[55]:
+# Generates the g3m (theory) curves for \ell_2 classification.
 
 
 import numpy as np
@@ -14,19 +14,16 @@ parser=argparse.ArgumentParser(description="Job launcher")
 from scipy.special import erf
 from scipy.integrate import quad,nquad
 from scipy.optimize import minimize_scalar
-#from sklearn.gaussian_process.kernels import RBF
-#from sklearn.model_selection import train_test_split
-
-#from sklearn.kernel_ridge import KernelRidge
 import sys
 
 epsabs = 1e-10
 epsrel = 1e-10
 limit = 100
-#parser.add_argument("-l",type=float)#lamb
-parser.add_argument("-a",type=float)#alpha
-parser.add_argument("-r",type=float)#r
-parser.add_argument("-s",type=float)#sigma
+
+#parameters
+parser.add_argument("-a",type=float)#alpha, capacity
+parser.add_argument("-r",type=float)#r, source
+parser.add_argument("-s",type=float)#sigma, noise level
 parser.add_argument("-p",type=int)#p
 args=parser.parse_args()
 
@@ -38,16 +35,10 @@ from sklearn.model_selection import GridSearchCV
 from sklearn import linear_model
 from sklearn.linear_model import SGDClassifier, LogisticRegression
 
-# %load_ext autoreload
-# %autoreload 2
 
 
-# ## Global Variables
-
-# In[56]:
 
 
-# Dimensions
 p = args.p
 alph=args.a
 r=args.r 
@@ -55,31 +46,19 @@ sig=args.s
 
 k = p
 d=p
- #Noise variance
+
 gamma = k/p
 
-# Regularisation
-#ell = args.l
-
-
-# ## Replicas
-
-# In[3]:
-
-alphas=np.logspace(1,np.log10(p),10)/p
+alphas=np.logspace(1,np.log10(p),10)/p #sample complexities
 l=len(alphas)
 
 
 
-spec_Omega = np.array([p/(k+1)**alph for k in range(p)])
-#Omega=np.diag(spec_Omega0)
+spec_Omega = np.array([p/(k+1)**alph for k in range(p)])  #Sigma
 Phi = spec_Omega
 Psi = spec_Omega
 
-teacher = np.sqrt(np.array([1/(k+1)**((1+alph*(2*r-1))) for k in range(p)]))
-
-
-# In[5]:
+teacher = np.sqrt(np.array([1/(k+1)**((1+alph*(2*r-1))) for k in range(p)]))  #theta
 
 
 rho = np.mean(Psi * teacher**2)
@@ -159,9 +138,6 @@ keys=['task',
 
 replicas=pd.DataFrame(data=results, columns=keys)
 
-
-#print(replicas)
-#print(results)
 
 
 
