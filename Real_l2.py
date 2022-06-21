@@ -1,4 +1,6 @@
 
+#Simulations for real datasets, \ell_2 classification.
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -8,12 +10,8 @@ parser=argparse.ArgumentParser(description="Job launcher")
 from scipy.special import erf
 from sklearn.kernel_ridge import KernelRidge
 
-#from sklearn.gaussian_process.kernels import RBF
-#from sklearn.model_selection import train_test_split
 
-#from sklearn.kernel_ridge import KernelRidge
 import sys
-#parser.add_argument("-l",type=float)#lambda
 parser.add_argument("-g", type=float) #gamma parameter
 parser.add_argument("-k", type=str)  #kernel
 parser.add_argument("-v", type=int) #index of sample
@@ -29,16 +27,14 @@ from sklearn import linear_model
 from sklearn.linear_model import SGDClassifier, LogisticRegression
 from sklearn.metrics import make_scorer
 
-# %load_ext autoreload
-# %autoreload 2
-# Dimensions
 
 
-gamma=args.g #RBF inverse variance
-#sigma=args.p
+gamma=args.g #gamma parameter for the RBF/poly kernel
+
 kernel=args.k
 
 dataset=args.d
+#Loading the dataset
 X=np.load("datasets/{}_X.npy".format(dataset))
 y=np.load("datasets/{}_y.npy".format(dataset))
 
@@ -57,7 +53,6 @@ score=make_scorer(score, greater_is_better=True)
 def simulate(samples,  seed, estimator="logistic"):
     verbose=False
     n = samples
-    #lamb=n*n**(-ell)
    
     
     np.random.seed(seed)
@@ -66,7 +61,7 @@ def simulate(samples,  seed, estimator="logistic"):
     X_train = X[inds, :] # training data
     y_train = y[inds] # training labels
 
-    X_test = X # test data
+    X_test = X # test data, using the whole dataset. See also Canatar et al., Nature 2020 and Loureiro et al., NIPS 2021
     y_test = y # test labels
     
     if kernel=="polynomial":
@@ -79,9 +74,6 @@ def simulate(samples,  seed, estimator="logistic"):
                             ,scoring=score)
     
     reg.fit(X_train,y_train)
-    #w=np.array(reg.coef_)
-    #print(w)
-    #print(reg.coef_)
     yhat_train = np.sign(reg.predict(X_train))
     yhat_test =np.sign( reg.predict(X_test))
     
@@ -90,8 +82,6 @@ def simulate(samples,  seed, estimator="logistic"):
     train_error = 1-np.mean(yhat_train == y_train)
     test_error  = 1- np.mean(yhat_test == y_test)
 
-    #q=np.dot(w, Omega @ w) / p
-    #m=np.dot(w, Phi @ teacher)/ np.sqrt(p*d)
     
     return [train_error,test_error,lamb,samples,seed]
 
