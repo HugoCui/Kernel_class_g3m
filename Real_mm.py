@@ -1,3 +1,5 @@
+# Simulations, max-margin classification on real datasets.
+
 
 import numpy as np
 import pandas as pd
@@ -9,13 +11,10 @@ from scipy.special import erf
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.svm import SVC
 from sklearn.metrics.pairwise import laplacian_kernel
-#from sklearn.gaussian_process.kernels import RBF
-#from sklearn.model_selection import train_test_split
 
-#from sklearn.kernel_ridge import KernelRidge
 import sys
-#parser.add_argument("-l",type=float)#lambda
-parser.add_argument("-g", type=float) #gamma parameter
+
+parser.add_argument("-g", type=float) #gamma parameter for the RBF/poly kernel
 parser.add_argument("-k", type=str)  #kernel
 parser.add_argument("-v", type=int) #index of sample
 parser.add_argument("-d", type=str) #dataset
@@ -30,13 +29,10 @@ from sklearn import linear_model
 from sklearn.linear_model import SGDClassifier, LogisticRegression
 from sklearn.metrics import make_scorer
 
-# %load_ext autoreload
-# %autoreload 2
-# Dimensions
 
 
-gamma=args.g #RBF inverse variance
-#sigma=args.p
+
+gamma=args.g 
 kernel=args.k
 
 dataset=args.d
@@ -58,7 +54,7 @@ score=make_scorer(score, greater_is_better=True)
 def simulate(samples,  seed, estimator="logistic"):
     verbose=False
     n = samples
-    #lamb=n*n**(-ell)
+    
    
     
     np.random.seed(seed)
@@ -67,32 +63,20 @@ def simulate(samples,  seed, estimator="logistic"):
     X_train = X[inds, :] # training data
     y_train = y[inds] # training labels
 
-    X_test = X # test data
+    X_test = X # test data. The whole dataset is used, see also e.g. Canatar et al., 2021 or Loureiro et al., 2021
     y_test = y # test labels
-    if kernel=="laplacian": 
-        K = np.array(laplacian_kernel(X_train, gamma=gamma))
-        reg=SVC(C=1e4,gamma=gamma,kernel="precomputed").fit(K,y_train)
-        K_test=np.array(laplacian_kernel(X=X_test,Y=X_train, gamma=gamma))
-        yhat_train=reg.predict(K)
-        yhat_test=reg.predict(K_test)
+    reg= SVC(C=1e4,kernel=kernel,gamma=gamma,degree=5).fit(X_train,y_train) 
     
-    else:
-        reg= SVC(C=1e4,kernel=kernel,gamma=gamma,degree=5).fit(X_train,y_train) 
     
-    #reg.fit(X_train,y_train)
-    #w=np.array(reg.coef_)
-    #print(w)
-    #print(reg.coef_)
-        yhat_train = np.sign(reg.predict(X_train))
-        yhat_test =np.sign( reg.predict(X_test))
+    yhat_train = np.sign(reg.predict(X_train))
+    yhat_test =np.sign( reg.predict(X_test))
     
     lamb=1e-4   
     
     train_error = 1-np.mean(yhat_train == y_train)
     test_error  = 1- np.mean(yhat_test == y_test)
 
-    #q=np.dot(w, Omega @ w) / p
-    #m=np.dot(w, Phi @ teacher)/ np.sqrt(p*d)
+    
     
     return [train_error,test_error,lamb,samples,seed]
 
