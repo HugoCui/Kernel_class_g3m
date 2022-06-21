@@ -1,4 +1,5 @@
 # Simulations, max-margin classification on real datasets.
+# The datasets are standard and can be readily found online. They are not included in the repo because of space limitations. 
 
 
 import numpy as np
